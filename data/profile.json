@@ -1,0 +1,102 @@
+{
+"name": "Praveen Rathod",
+
+"education": {
+"college": "Indian Institute of Technology (ISM) Dhanbad",
+"degree": "Bachelor of Technology",
+"branch": "Mining Engineering",
+"duration": "2022-2026"
+},
+
+"summary": "I am a B.Tech student at IIT (ISM) Dhanbad with a strong passion for Artificial Intelligence, Machine Learning, Software Engineering, and startups. I enjoy building real-world AI products, exploring new technologies, and continuously improving my skills through hands-on projects and problem solving.",
+
+"skills": {
+"languages": [
+"C++",
+"Python",
+"JavaScript",
+"TypeScript"
+],
+"fullstack": [
+"React",
+"Node.js",
+"Express.js",
+"MongoDB",
+"SQL",
+"Next.js",
+"API Integration"
+],
+"ai": [
+"LLMs",
+"RAG",
+"LangChain",
+"LangGraph",
+"Embeddings",
+"Prompt Engineering",
+"Vector Databases",
+"Pinecone"
+],
+"cloud": [
+"AWS",
+"GCP"
+]
+},
+
+"projects": [
+{
+"name": "Chat With Codebase (RAG)",
+"description": "Built a system that allows users to query and understand GitHub repositories using natural language. Implemented semantic code chunking, vector embeddings, retrieval pipelines, and context-aware code explanations."
+},
+{
+"name": "AI Project Planning & Guidance Chatbot",
+"description": "Built an LLM-powered assistant using LangChain and LangGraph that converts project ideas into structured execution plans, technical roadmaps, and tool recommendations."
+}
+],
+
+"achievements": [
+"Solved 400+ LeetCode problems",
+"3-Star CodeChef rating",
+"Participated in Spike AI Hackathon",
+"Built AI-focused social media platforms reaching 160K+ followers",
+"Generated more than 200M organic views across social platforms"
+],
+
+"strengths": [
+"Fast learner",
+"Execution-focused",
+"Self-driven",
+"Strong problem-solving ability",
+"Curious mindset",
+"Startup-oriented thinking"
+],
+
+"growthAreas": [
+"System Design",
+"Leadership",
+"Communication",
+"Production-grade AI Systems"
+],
+
+"interests": [
+"Artificial Intelligence",
+"Machine Learning",
+"Software Engineering",
+"Startups",
+"Product Development"
+],
+
+"careerGoals": {
+"shortTerm": "Become a strong AI Engineer and build production-ready AI systems.",
+"longTerm": "Build impactful technology products and contribute to innovative startups."
+},
+
+"superpower": "My biggest strength is learning new technologies quickly and turning ideas into working products through fast execution.",
+
+"misconception": "People sometimes think I only focus on AI and coding, but I spend a lot of time understanding products, users, startups, and business problems as well.",
+
+"workStyle": {
+"learning": "I learn by building projects. I prefer hands-on implementation over passive learning.",
+"problemSolving": "I break complex problems into smaller parts and solve them step by step.",
+"boundaries": "I push my limits by taking on projects that are slightly beyond my current skill level and learning what is needed along the way."
+}
+}
