@@ -67,12 +67,17 @@ export default function Chat() {
         speech.pitch  = 1;
         speech.volume = 1;
 
-        // Pick best available voice: Google → Microsoft → browser default
+        // Pick male voice: David/Mark/Guy → Google en → Microsoft en → any English
         const pickVoice = () => {
           const voices = window.speechSynthesis.getVoices();
-          const google    = voices.find((v) => v.name.toLowerCase().includes("google") && v.lang.startsWith("en"));
+          const maleVoice = voices.find((v) =>
+            v.name.toLowerCase().includes("david") ||
+            v.name.toLowerCase().includes("mark")  ||
+            v.name.toLowerCase().includes("guy")
+          );
+          const google    = voices.find((v) => v.name.toLowerCase().includes("google")    && v.lang.startsWith("en"));
           const microsoft = voices.find((v) => v.name.toLowerCase().includes("microsoft") && v.lang.startsWith("en"));
-          speech.voice = google ?? microsoft ?? voices.find((v) => v.lang.startsWith("en")) ?? null;
+          speech.voice = maleVoice ?? google ?? microsoft ?? voices.find((v) => v.lang.startsWith("en")) ?? null;
           if (voiceEnabled) { window.speechSynthesis.speak(speech); }
         };
 
@@ -114,10 +119,7 @@ export default function Chat() {
       const transcript = event.results[0][0].transcript;
       setQuestion(transcript);
       setIsListening(false);
-      // Auto-send after short delay so state settles
-      setTimeout(() => {
-        handleSend(transcript);
-      }, 500);
+      inputRef.current?.focus();
     };
     recognition.onerror = (event: any) => {
       console.log("Speech Error:", event.error);
