@@ -131,580 +131,446 @@ export default function Chat() {
 
   const [isDark, setIsDark] = useState(true);
 
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ── TOKENS ── */
-        .app.dark {
-          --bg:           #0d1117;
-          --bg-panel:     #161b22;
-          --bg-card:      #21262d;
-          --bg-hover:     #30363d;
-          --border:       #30363d;
-          --border-focus: #6366f1;
-          --text-1:       #e6edf3;
-          --text-2:       #8b949e;
-          --text-3:       #484f58;
-          --accent:       #6366f1;
-          --accent-2:     #38bdf8;
-          --green:        #3fb950;
-          --user-bubble:  #6366f1;
-          --ai-bubble:    #21262d;
-          --ai-border:    #30363d;
-          --input-bg:     #0d1117;
-          --shadow:       0 8px 32px rgba(0,0,0,.5);
-        }
-        .app.light {
-          --bg:           #f6f8fa;
-          --bg-panel:     #ffffff;
-          --bg-card:      #f0f2f5;
-          --bg-hover:     #e8eaed;
-          --border:       #d0d7de;
-          --border-focus: #6366f1;
-          --text-1:       #1f2328;
-          --text-2:       #656d76;
-          --text-3:       #adb5bd;
-          --accent:       #6366f1;
-          --accent-2:     #0284c7;
-          --green:        #1a7f37;
-          --user-bubble:  #6366f1;
-          --ai-bubble:    #f0f2f5;
-          --ai-border:    #d0d7de;
-          --input-bg:     #ffffff;
-          --shadow:       0 4px 16px rgba(0,0,0,.08);
-        }
-
         html, body {
-          height: 100%; width: 100%;
+          width: 100%; height: 100%;
           font-family: 'Inter', sans-serif;
           -webkit-font-smoothing: antialiased;
           overflow: hidden;
         }
 
-        /* ── APP SHELL ── */
+        /* ── THEME TOKENS ── */
+        .app {
+          --bg:          #212121;
+          --bg2:         #2f2f2f;
+          --bg3:         #3a3a3a;
+          --border:      #3f3f3f;
+          --text1:       #ececec;
+          --text2:       #b4b4b4;
+          --text3:       #666;
+          --user-pill:   #2f2f2f;
+          --input-bg:    #2f2f2f;
+          --input-ring:  rgba(255,255,255,.1);
+          --send-bg:     #ffffff;
+          --send-color:  #000000;
+          --accent:      #6366f1;
+        }
+        .app.light {
+          --bg:          #ffffff;
+          --bg2:         #f4f4f4;
+          --bg3:         #e8e8e8;
+          --border:      #e0e0e0;
+          --text1:       #0d0d0d;
+          --text2:       #555;
+          --text3:       #999;
+          --user-pill:   #f4f4f4;
+          --input-bg:    #f4f4f4;
+          --input-ring:  rgba(0,0,0,.08);
+          --send-bg:     #0d0d0d;
+          --send-color:  #ffffff;
+          --accent:      #6366f1;
+        }
+
+        /* ── SHELL ── */
         .app {
           width: 100vw; height: 100dvh; height: 100vh;
           display: flex; flex-direction: column;
           background: var(--bg);
-          color: var(--text-1);
+          color: var(--text1);
           transition: background .2s, color .2s;
-        }
-
-        /* ════════════════════════════
-           TOPBAR
-        ════════════════════════════ */
-        .topbar {
-          height: 56px;
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 0 28px;
-          background: var(--bg-panel);
-          border-bottom: 1px solid var(--border);
-          flex-shrink: 0;
-          gap: 16px;
           position: relative;
-          z-index: 10;
         }
 
-        .topbar-left { display: flex; align-items: center; gap: 10px; }
-
-        .brand-icon {
-          width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-          background: linear-gradient(135deg, #6366f1, #38bdf8);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 16px;
-          box-shadow: 0 0 16px rgba(99,102,241,.4);
+        /* ════════════════════
+           TOPBAR
+        ════════════════════ */
+        .topbar {
+          position: absolute; top: 0; left: 0; right: 0;
+          height: 52px;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 0 20px;
+          z-index: 20;
         }
+
+        .tb-left { display: flex; align-items: center; gap: 8px; }
 
         .brand-name {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 15px; font-weight: 700;
-          color: var(--text-1); letter-spacing: -.02em;
+          font-size: 16px; font-weight: 600;
+          color: var(--text1); letter-spacing: -.01em;
         }
 
-        .brand-sub {
-          font-size: 11px; color: var(--text-2);
-          letter-spacing: .04em; text-transform: uppercase;
-          margin-left: 4px; margin-top: 1px;
-        }
+        .tb-right { display: flex; align-items: center; gap: 8px; }
 
-        .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-        /* status pill */
-        .status-pill {
-          display: flex; align-items: center; gap: 5px;
-          padding: 4px 10px;
-          background: rgba(63,185,80,.1);
-          border: 1px solid rgba(63,185,80,.25);
-          border-radius: 999px;
-        }
-        .status-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: var(--green);
-          animation: pdot 2s infinite;
-        }
-        @keyframes pdot {
-          0%,100% { box-shadow: 0 0 0 0 rgba(63,185,80,.4); }
-          50%      { box-shadow: 0 0 0 4px rgba(63,185,80,0); }
-        }
-        .status-txt { font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: .05em; text-transform: uppercase; }
-
-        /* icon button base */
-        .icon-btn {
-          height: 34px; padding: 0 12px; border-radius: 8px;
+        .tb-btn {
+          height: 32px; padding: 0 12px; border-radius: 8px;
           border: 1px solid var(--border);
-          background: transparent;
-          color: var(--text-2);
-          font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
-          cursor: pointer; display: flex; align-items: center; gap: 6px;
-          transition: all .15s; white-space: nowrap; flex-shrink: 0;
+          background: transparent; color: var(--text2);
+          font-size: 11.5px; font-weight: 500; font-family: 'Inter', sans-serif;
+          cursor: pointer; display: flex; align-items: center; gap: 5px;
+          transition: all .15s; white-space: nowrap;
           letter-spacing: .01em;
         }
-        .icon-btn:hover { background: var(--bg-hover); color: var(--text-1); border-color: var(--border-focus); }
+        .tb-btn:hover { background: var(--bg2); color: var(--text1); }
 
-        .voice-btn-on  { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.35); color: #a5b4fc; }
-        .voice-btn-off { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.3);   color: #fca5a5; }
-        .voice-btn-on:hover  { background: rgba(99,102,241,.18); }
-        .voice-btn-off:hover { background: rgba(239,68,68,.15); }
+        .voice-on  { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.3); color: #a5b4fc; }
+        .voice-off { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.25); color: #fca5a5; }
+        .voice-on:hover  { background: rgba(99,102,241,.18); }
+        .voice-off:hover { background: rgba(239,68,68,.14); }
 
-        /* theme toggle */
-        .theme-btn { font-size: 15px; padding: 0 10px; }
-
-        /* ════════════════════════════
-           HERO STRIP  (compact)
-        ════════════════════════════ */
-        .hero-strip {
-          padding: 12px 28px;
-          background: var(--bg-panel);
-          border-bottom: 1px solid var(--border);
-          display: flex; align-items: center; gap: 20px;
-          flex-shrink: 0; flex-wrap: wrap;
+        /* ════════════════════
+           EMPTY STATE
+          (vertically centered, input in middle)
+        ════════════════════ */
+        .empty-screen {
+          flex: 1;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          padding: 80px 24px 0;
+          gap: 32px;
         }
 
-        .hero-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-
-        .hero-name {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 16px; font-weight: 700;
-          color: var(--text-1); letter-spacing: -.02em; white-space: nowrap;
-        }
-        .hero-name span {
-          background: linear-gradient(90deg, #38bdf8, #6366f1);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text;
+        .empty-greeting {
+          font-size: clamp(22px, 3vw, 32px);
+          font-weight: 600; color: var(--text1);
+          letter-spacing: -.02em; text-align: center;
         }
 
-        .hero-tagline { font-size: 11.5px; color: var(--text-2); white-space: nowrap; }
-
-        .badges { display: flex; flex-wrap: wrap; gap: 6px; }
-
-        .badge {
-          display: flex; align-items: center; gap: 4px;
-          padding: 3px 10px; border-radius: 999px;
-          font-size: 11px; font-weight: 500; border: 1px solid;
-          white-space: nowrap; transition: transform .12s;
-          cursor: default;
+        .empty-input-wrap {
+          width: 100%; max-width: 680px;
+          display: flex; flex-direction: column; gap: 14px;
+          align-items: center;
         }
-        .badge:hover { transform: translateY(-1px); }
-        .badge-blue    { background:rgba(59,130,246,.1);  color:#93c5fd; border-color:rgba(59,130,246,.25); }
-        .badge-violet  { background:rgba(139,92,246,.1);  color:#c4b5fd; border-color:rgba(139,92,246,.25); }
-        .badge-emerald { background:rgba(16,185,129,.1);  color:#6ee7b7; border-color:rgba(16,185,129,.25); }
-        .badge-amber   { background:rgba(245,158,11,.1);  color:#fcd34d; border-color:rgba(245,158,11,.25); }
-        .badge-rose    { background:rgba(244,63,94,.1);   color:#fda4af; border-color:rgba(244,63,94,.25); }
 
-        /* Light mode badge adjustments */
-        .app.light .badge-blue    { background:rgba(59,130,246,.08);  color:#2563eb; }
-        .app.light .badge-violet  { background:rgba(139,92,246,.08);  color:#7c3aed; }
-        .app.light .badge-emerald { background:rgba(16,185,129,.08);  color:#059669; }
-        .app.light .badge-amber   { background:rgba(245,158,11,.08);  color:#d97706; }
-        .app.light .badge-rose    { background:rgba(244,63,94,.08);   color:#e11d48; }
-
-        /* ════════════════════════════
-           CHIPS BAR
-        ════════════════════════════ */
-        .chips-bar {
-          padding: 8px 28px;
-          background: var(--bg-panel);
-          border-bottom: 1px solid var(--border);
-          display: flex; align-items: center; gap: 7px;
-          flex-shrink: 0;
-          overflow-x: auto; -webkit-overflow-scrolling: touch;
-        }
-        .chips-bar::-webkit-scrollbar { display: none; }
-
-        .chips-lbl {
-          font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
-          color: var(--text-3); font-weight: 600; flex-shrink: 0;
-          margin-right: 2px;
+        .chips-row {
+          display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
         }
 
         .chip {
-          padding: 4px 13px;
-          background: var(--bg-card);
+          padding: 7px 16px;
+          background: var(--bg2);
           border: 1px solid var(--border);
           border-radius: 999px;
-          color: var(--text-2);
-          font-size: 12px; font-family: 'Inter', sans-serif;
-          cursor: pointer; white-space: nowrap; flex-shrink: 0;
+          color: var(--text2); font-size: 13px;
+          font-family: 'Inter', sans-serif;
+          cursor: pointer; white-space: nowrap;
           transition: all .15s;
         }
         .chip:hover {
-          background: rgba(99,102,241,.12);
-          border-color: rgba(99,102,241,.4);
-          color: var(--text-1);
-          transform: translateY(-1px);
+          background: var(--bg3); color: var(--text1);
+          border-color: var(--accent);
         }
-        .chip:active { transform: none; }
 
-        /* ════════════════════════════
-           MESSAGES AREA  (flex-1 = fills everything)
-        ════════════════════════════ */
+        /* ════════════════════
+           CHAT SCREEN
+        ════════════════════ */
+        .chat-screen {
+          flex: 1; display: flex; flex-direction: column;
+          padding-top: 52px; /* topbar height */
+          min-height: 0;
+        }
+
         .msgs {
           flex: 1; overflow-y: auto;
-          padding: 32px 0 16px;
-          display: flex; flex-direction: column;
+          padding: 40px 0 24px;
           scroll-behavior: smooth;
         }
         .msgs::-webkit-scrollbar { width: 4px; }
         .msgs::-webkit-scrollbar-track { background: transparent; }
-        .msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+        .msgs::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 999px; }
 
-        /* inner width constraint — ChatGPT-style centered column */
         .msgs-inner {
-          width: 100%; max-width: 860px;
-          margin: 0 auto;
-          padding: 0 24px;
-          display: flex; flex-direction: column; gap: 24px;
+          width: 100%; max-width: 720px;
+          margin: 0 auto; padding: 0 24px;
+          display: flex; flex-direction: column; gap: 28px;
         }
 
-        /* empty state */
-        .empty {
-          flex: 1; display: flex; flex-direction: column;
-          align-items: center; justify-content: center;
-          gap: 10px; text-align: center; padding: 60px 24px;
-          color: var(--text-3);
+        /* USER message — pill aligned right, no avatar */
+        .msg-user {
+          display: flex; justify-content: flex-end;
+          animation: fadein .2s ease;
         }
-        .empty-ico { font-size: 40px; opacity: .3; }
-        .empty-ttl { font-size: 16px; color: var(--text-2); font-weight: 500; }
-        .empty-sub { font-size: 13px; color: var(--text-3); max-width: 320px; line-height: 1.6; }
-
-        /* message row */
-        .mrow {
-          display: flex; gap: 12px;
-          animation: mslide .22s ease forwards;
+        .user-pill {
+          background: var(--user-pill);
+          color: var(--text1);
+          border-radius: 18px;
+          padding: 12px 18px;
+          font-size: 15px; line-height: 1.6;
+          max-width: 75%;
+          word-break: break-word;
         }
-        .mrow.user      { flex-direction: row-reverse; }
-        .mrow.assistant { flex-direction: row; }
 
-        @keyframes mslide {
-          from { opacity:0; transform:translateY(8px); }
+        /* AI message — no bubble, plain text flush left */
+        .msg-ai {
+          display: flex; flex-direction: column; gap: 8px;
+          animation: fadein .2s ease;
+        }
+        .ai-text {
+          font-size: 15px; line-height: 1.75;
+          color: var(--text1);
+          word-break: break-word;
+          max-width: 100%;
+        }
+
+        @keyframes fadein {
+          from { opacity:0; transform:translateY(6px); }
           to   { opacity:1; transform:translateY(0); }
         }
 
-        /* avatar */
-        .mav {
-          width: 30px; height: 30px; flex-shrink: 0;
-          border-radius: 50%; display: flex; align-items: center;
-          justify-content: center; font-size: 13px; margin-top: 2px;
-        }
-        .mav.ai  { background: linear-gradient(135deg,#6366f1,#38bdf8); box-shadow: 0 0 12px rgba(99,102,241,.3); }
-        .mav.usr { background: var(--bg-card); border: 1px solid var(--border); }
-
-        /* bubble wrapper */
-        .mwrap { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }
-        .mrow.user .mwrap { align-items: flex-end; }
-
-        .mlbl {
-          font-size: 10px; font-weight: 600; letter-spacing: .06em;
-          text-transform: uppercase; color: var(--text-3);
-          padding: 0 4px;
-        }
-
-        .bubble {
-          padding: 12px 16px;
-          border-radius: 14px;
-          font-size: 14px; line-height: 1.7;
-          word-break: break-word;
-        }
-        .bubble.u {
-          background: var(--user-bubble);
-          color: #fff;
-          border-bottom-right-radius: 4px;
-          box-shadow: 0 2px 12px rgba(99,102,241,.3);
-        }
-        .bubble.a {
-          background: var(--ai-bubble);
-          color: var(--text-1);
-          border: 1px solid var(--ai-border);
-          border-bottom-left-radius: 4px;
-        }
-
         /* thinking dots */
-        .tdots { display:flex; align-items:center; gap:5px; padding:14px 16px; }
+        .tdots { display: flex; align-items: center; gap: 5px; padding: 4px 0; }
         .td {
-          width:7px; height:7px; border-radius:50%;
+          width: 8px; height: 8px; border-radius: 50%;
+          background: var(--text3);
           animation: tbounce 1.3s infinite ease-in-out;
         }
-        .td:nth-child(1){ background:#38bdf8; }
-        .td:nth-child(2){ background:#6366f1; animation-delay:.2s; }
-        .td:nth-child(3){ background:#8b5cf6; animation-delay:.4s; }
+        .td:nth-child(2) { animation-delay: .2s; }
+        .td:nth-child(3) { animation-delay: .4s; }
         @keyframes tbounce {
-          0%,80%,100%{ transform:scale(.65); opacity:.5; }
-          40%        { transform:scale(1.15); opacity:1; }
+          0%,80%,100% { transform: scale(.65); opacity: .4; }
+          40%         { transform: scale(1);   opacity: 1; }
         }
 
-        /* ════════════════════════════
-           INPUT AREA
-        ════════════════════════════ */
-        .ia {
-          padding: 16px 24px 20px;
-          background: var(--bg-panel);
-          border-top: 1px solid var(--border);
-          flex-shrink: 0;
+        /* ════════════════════
+           INPUT BAR
+           (shared by both states)
+        ════════════════════ */
+        .input-zone {
+          width: 100%; max-width: 680px;
+          margin: 0 auto;
+          padding: 0 16px;
         }
 
-        /* same width constraint as messages */
-        .ia-inner {
-          width: 100%; max-width: 860px; margin: 0 auto;
-          display: flex; flex-direction: column; gap: 10px;
+        /* empty screen: no extra bottom padding */
+        .empty-input-wrap .input-zone { padding: 0; }
+
+        /* chat screen: pinned at bottom */
+        .chat-input-wrap {
+          padding: 12px 24px 20px;
+          display: flex; flex-direction: column;
+          align-items: center; gap: 10px;
         }
 
-        .irow {
-          display: flex; align-items: center; gap: 8px;
+        .ibar {
+          width: 100%;
+          display: flex; align-items: center; gap: 6px;
           background: var(--input-bg);
           border: 1px solid var(--border);
-          border-radius: 12px;
-          padding: 6px 8px 6px 16px;
+          border-radius: 16px;
+          padding: 8px 8px 8px 16px;
           transition: border-color .18s, box-shadow .18s;
         }
-        .irow:focus-within {
-          border-color: var(--border-focus);
-          box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+        .ibar:focus-within {
+          border-color: rgba(255,255,255,.2);
+          box-shadow: 0 0 0 4px var(--input-ring);
         }
-
-        .mic {
-          width: 36px; height: 36px; flex-shrink: 0;
-          border-radius: 8px; border: 1px solid var(--border);
-          background: transparent; color: var(--text-2);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 15px; cursor: pointer; transition: all .15s;
-        }
-        .mic:hover { background: var(--bg-hover); border-color: var(--border-focus); color: var(--text-1); }
-        .mic.on    { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); color: #fca5a5; animation: mpulse 1s infinite; }
-        @keyframes mpulse {
-          0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,.35); }
-          50%    { box-shadow:0 0 0 6px rgba(239,68,68,0); }
+        .app.light .ibar:focus-within {
+          border-color: rgba(0,0,0,.15);
         }
 
         .ci {
-          flex:1; background: transparent; border: none; outline: none;
-          color: var(--text-1); font-family: 'Inter', sans-serif;
-          font-size: 14px; padding: 8px 4px;
-          caret-color: #6366f1;
+          flex: 1; background: transparent; border: none; outline: none;
+          color: var(--text1); font-family: 'Inter', sans-serif;
+          font-size: 15px; padding: 6px 4px;
+          caret-color: var(--text1);
+          resize: none;
         }
-        .ci::placeholder { color: var(--text-3); }
+        .ci::placeholder { color: var(--text3); }
 
-        .sbtn {
-          height: 38px; padding: 0 18px; border-radius: 9px;
-          background: linear-gradient(135deg,#4f46e5,#6366f1);
-          border: none; color: #fff;
-          font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-          cursor: pointer; display: flex; align-items: center; gap: 6px;
-          flex-shrink: 0; letter-spacing: .01em;
-          box-shadow: 0 1px 8px rgba(99,102,241,.35);
-          transition: all .15s; white-space: nowrap;
+        /* mic button */
+        .mic-btn {
+          width: 36px; height: 36px; flex-shrink: 0;
+          border-radius: 10px; border: none;
+          background: transparent; color: var(--text2);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px; cursor: pointer; transition: all .15s;
         }
-        .sbtn:hover:not(:disabled) { background:linear-gradient(135deg,#4338ca,#4f46e5); box-shadow:0 4px 16px rgba(99,102,241,.45); transform:translateY(-1px); }
-        .sbtn:active:not(:disabled){ transform:none; }
-        .sbtn:disabled { opacity:.4; cursor:not-allowed; }
-
-        .sbtn-label { display:inline; }
-        .sbtn-ico   { display:none; }
-
-        .ifooter {
-          text-align: center; font-size: 11px;
-          color: var(--text-3); letter-spacing: .02em;
+        .mic-btn:hover { background: var(--bg3); color: var(--text1); }
+        .mic-btn.on    {
+          color: #f87171;
+          animation: micpulse 1s infinite;
+        }
+        @keyframes micpulse {
+          0%,100% { opacity:1; }
+          50%      { opacity:.5; }
         }
 
-        /* ════════════════════════════
+        /* send button */
+        .send-btn {
+          width: 36px; height: 36px; flex-shrink: 0;
+          border-radius: 10px; border: none;
+          background: var(--send-bg); color: var(--send-color);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px; cursor: pointer;
+          transition: all .15s;
+          box-shadow: none;
+        }
+        .send-btn:hover:not(:disabled) { opacity: .85; transform: scale(1.04); }
+        .send-btn:disabled { opacity: .25; cursor: not-allowed; }
+
+        .footer-note {
+          font-size: 11.5px; color: var(--text3);
+          text-align: center; letter-spacing: .01em;
+        }
+
+        /* ════════════════════
            RESPONSIVE
-        ════════════════════════════ */
+        ════════════════════ */
         @media (max-width: 767px) {
-          .topbar { padding: 0 16px; height: 50px; }
-          .brand-sub { display:none; }
-          .status-txt { display:none; }
-
-          .hero-strip { padding: 10px 16px; gap: 10px; }
-          .hero-tagline { display:none; }
-          .badges { gap:5px; }
-          .badge { font-size:10.5px; padding:3px 9px; }
-
-          .chips-bar { padding: 7px 16px; }
-          .chips-lbl { display:none; }
-          .chip { font-size:11.5px; padding:4px 11px; }
-
-          .msgs { padding: 20px 0 12px; }
-          .msgs-inner { padding: 0 14px; gap:18px; }
-          .mwrap { max-width:88%; }
-          .bubble { font-size:13.5px; padding:10px 14px; }
-          .mav { width:26px; height:26px; font-size:12px; }
-
-          .ia { padding: 10px 14px 16px; }
-          .ia-inner { gap:8px; }
-          .sbtn { padding:0 14px; }
-          .sbtn-label { display:none; }
-          .sbtn-ico   { display:inline; font-size:16px; }
-          .ifooter { font-size:10px; }
-        }
-
-        @media (max-width: 380px) {
-          .hero-name { font-size:14px; }
-          .badge { font-size:10px; padding:2px 8px; }
+          .topbar { padding: 0 14px; }
+          .brand-sub-txt { display: none; }
+          .empty-greeting { font-size: 20px; }
+          .msgs-inner { padding: 0 16px; gap: 20px; }
+          .user-pill { font-size: 14px; padding: 10px 15px; }
+          .ai-text { font-size: 14px; }
+          .chat-input-wrap { padding: 10px 16px 16px; }
+          .input-zone { max-width: 100%; }
+          .chip { font-size: 12px; padding: 6px 13px; }
+          .empty-greeting { padding-top: 0; }
         }
       `}</style>
 
-      <div className={`app ${isDark ? "dark" : "light"}`}>
+      <div className={`app${isDark ? "" : " light"}`}>
 
-        {/* ── TOPBAR ── */}
+        {/* ══ TOPBAR (always visible) ══ */}
         <div className="topbar">
-          <div className="topbar-left">
-            <div className="brand-icon">🤖</div>
-            <div>
-              <div className="brand-name">Digital Praveen</div>
-            </div>
-            <span className="brand-sub">AI Engineer · Voice Interview Agent</span>
+          <div className="tb-left">
+            <span className="brand-name">🤖 Digital Praveen</span>
           </div>
-
-          <div className="topbar-right">
-            {/* Voice toggle */}
+          <div className="tb-right">
             <button
-              className={`icon-btn ${voiceEnabled ? "voice-btn-on" : "voice-btn-off"}`}
-              onClick={() => { window.speechSynthesis.cancel(); setVoiceEnabled((v) => !v); }}
+              className={`tb-btn ${voiceEnabled ? "voice-on" : "voice-off"}`}
+              onClick={() => { window.speechSynthesis.cancel(); setVoiceEnabled(v => !v); }}
             >
-              {voiceEnabled ? "🔊" : "🔇"}
-              <span>{voiceEnabled ? "Voice On" : "Muted"}</span>
+              {voiceEnabled ? "🔊 Voice" : "🔇 Muted"}
             </button>
-
-            {/* Theme toggle */}
             <button
-              className="icon-btn theme-btn"
-              onClick={() => setIsDark((d) => !d)}
-              title={isDark ? "Switch to Light" : "Switch to Dark"}
+              className="tb-btn"
+              onClick={() => setIsDark(d => !d)}
+              title="Toggle theme"
             >
-              {isDark ? "☀️" : "🌙"}
+              {isDark ? "☀️ Light" : "🌙 Dark"}
             </button>
+          </div>
+        </div>
 
-            {/* Online status */}
-            <div className="status-pill">
-              <div className="status-dot" />
-              <span className="status-txt">Online</span>
+        {/* ══ EMPTY STATE ══ */}
+        {messages.length === 0 && !loading && (
+          <div className="empty-screen">
+            <div className="empty-greeting">
+              How can I help, Recruiter? 👋
             </div>
-          </div>
-        </div>
 
-        {/* ── HERO STRIP ── */}
-        <div className="hero-strip">
-          <div className="hero-info">
-            <div className="hero-name">👋 Hi, I'm <span>Praveen Rathod</span></div>
-            <div className="hero-tagline">B.Tech · IIT (ISM) Dhanbad · AI &amp; Software Engineering</div>
-          </div>
-          <div className="badges">
-            {badges.map((b) => (
-              <div key={b.label} className={`badge ${b.color}`}>
-                <span>{b.icon}</span><span>{b.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── CHIPS ── */}
-        <div className="chips-bar">
-          <span className="chips-lbl">Ask</span>
-          {suggestedQuestions.map((q) => (
-            <button key={q} className="chip" onClick={() => handleSend(q)}>{q}</button>
-          ))}
-        </div>
-
-        {/* ── MESSAGES ── */}
-        <div className="msgs">
-          <div className="msgs-inner">
-            {messages.length === 0 && !loading && (
-              <div className="empty">
-                <div className="empty-ico">💬</div>
-                <div className="empty-ttl">Start the conversation</div>
-                <div className="empty-sub">Click a suggested question above, or type your own below.</div>
-              </div>
-            )}
-
-            {messages.map((msg, i) => (
-              <div key={i} className={`mrow ${msg.role}`}>
-                {msg.role === "assistant" && <div className="mav ai">🤖</div>}
-                <div className="mwrap">
-                  <div className="mlbl">{msg.role === "user" ? "You" : "Praveen AI"}</div>
-                  <div className={`bubble ${msg.role === "user" ? "u" : "a"}`}>
-                    {msg.content}
-                  </div>
-                </div>
-                {msg.role === "user" && <div className="mav usr">👤</div>}
-              </div>
-            ))}
-
-            {loading && (
-              <div className="mrow assistant">
-                <div className="mav ai">🤖</div>
-                <div className="mwrap">
-                  <div className="mlbl">Praveen AI</div>
-                  <div className="bubble a tdots">
-                    <div className="td" /><div className="td" /><div className="td" />
-                  </div>
+            <div className="empty-input-wrap">
+              {/* Input bar */}
+              <div className="input-zone">
+                <div className="ibar">
+                  <input
+                    ref={inputRef}
+                    className="ci"
+                    value={question}
+                    onChange={e => setQuestion(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) handleSend(); }}
+                    placeholder="Ask anything…"
+                    autoComplete="off"
+                  />
+                  <button
+                    className={`mic-btn${isListening ? " on" : ""}`}
+                    onClick={startVoiceInput}
+                    title={isListening ? "Listening…" : "Voice input"}
+                  >
+                    {isListening ? "🔴" : "🎤"}
+                  </button>
+                  <button
+                    className="send-btn"
+                    onClick={() => handleSend()}
+                    disabled={!question.trim()}
+                  >
+                    ↑
+                  </button>
                 </div>
               </div>
-            )}
 
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* ── INPUT ── */}
-        <div className="ia">
-          <div className="ia-inner">
-            <div className="irow">
-              <button
-                className={`mic${isListening ? " on" : ""}`}
-                onClick={startVoiceInput}
-                title={isListening ? "Listening…" : "Voice input"}
-              >
-                {isListening ? "🔴" : "🎤"}
-              </button>
-
-              <input
-                ref={inputRef}
-                className="ci"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) handleSend(); }}
-                placeholder="Ask me about my projects, experience, or background…"
-                disabled={loading}
-                autoComplete="off"
-              />
-
-              <button
-                className="sbtn"
-                onClick={() => handleSend()}
-                disabled={loading || !question.trim()}
-              >
-                {loading
-                  ? <><span className="sbtn-label">Thinking…</span><span className="sbtn-ico">⏳</span></>
-                  : <><span className="sbtn-label">Send</span><span className="sbtn-ico">↑</span></>
-                }
-              </button>
+              {/* Suggested questions */}
+              <div className="chips-row">
+                {suggestedQuestions.map(q => (
+                  <button key={q} className="chip" onClick={() => handleSend(q)}>{q}</button>
+                ))}
+              </div>
             </div>
-            <p className="ifooter">Powered by Groq · Browser Speech · Responses are AI-generated</p>
           </div>
-        </div>
+        )}
+
+        {/* ══ CHAT STATE ══ */}
+        {(messages.length > 0 || loading) && (
+          <div className="chat-screen">
+            {/* Messages */}
+            <div className="msgs">
+              <div className="msgs-inner">
+                {messages.map((msg, i) => (
+                  msg.role === "user" ? (
+                    <div key={i} className="msg-user">
+                      <div className="user-pill">{msg.content}</div>
+                    </div>
+                  ) : (
+                    <div key={i} className="msg-ai">
+                      <div className="ai-text">{msg.content}</div>
+                    </div>
+                  )
+                ))}
+
+                {loading && (
+                  <div className="msg-ai">
+                    <div className="tdots">
+                      <div className="td"/><div className="td"/><div className="td"/>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* Input pinned at bottom */}
+            <div className="chat-input-wrap">
+              <div className="input-zone">
+                <div className="ibar">
+                  <input
+                    ref={inputRef}
+                    className="ci"
+                    value={question}
+                    onChange={e => setQuestion(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) handleSend(); }}
+                    placeholder="Ask anything…"
+                    disabled={loading}
+                    autoComplete="off"
+                  />
+                  <button
+                    className={`mic-btn${isListening ? " on" : ""}`}
+                    onClick={startVoiceInput}
+                    title={isListening ? "Listening…" : "Voice input"}
+                  >
+                    {isListening ? "🔴" : "🎤"}
+                  </button>
+                  <button
+                    className="send-btn"
+                    onClick={() => handleSend()}
+                    disabled={loading || !question.trim()}
+                  >
+                    {loading ? "…" : "↑"}
+                  </button>
+                </div>
+              </div>
+              <p className="footer-note">Powered by Groq · AI-generated responses</p>
+            </div>
+          </div>
+        )}
 
       </div>
     </>
