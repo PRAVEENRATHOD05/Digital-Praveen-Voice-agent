@@ -8,6 +8,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,19 +58,33 @@ export default function Chat() {
       const aiMessage: Message = { role: "assistant", content: data.answer };
       setMessages((prev) => [...prev, aiMessage]);
 
-      try {
-        const ttsResponse = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: data.answer }),
-        });
-        const ttsData = await ttsResponse.json();
-        if (ttsData.audio) {
-          const audio = new Audio(`data:audio/mp3;base64,${ttsData.audio}`);
-          audio.play();
+      // ── Browser Speech Synthesis (replaces ElevenLabs) ──
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+
+        const speech = new SpeechSynthesisUtterance(data.answer);
+        speech.rate   = 1;
+        speech.pitch  = 1;
+        speech.volume = 1;
+
+        // Pick best available voice: Google → Microsoft → browser default
+        const pickVoice = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const google    = voices.find((v) => v.name.toLowerCase().includes("google") && v.lang.startsWith("en"));
+          const microsoft = voices.find((v) => v.name.toLowerCase().includes("microsoft") && v.lang.startsWith("en"));
+          speech.voice = google ?? microsoft ?? voices.find((v) => v.lang.startsWith("en")) ?? null;
+          if (voiceEnabled) { window.speechSynthesis.speak(speech); }
+        };
+
+        // Voices may not be loaded yet on first call
+        if (window.speechSynthesis.getVoices().length > 0) {
+          pickVoice();
+        } else {
+          window.speechSynthesis.onvoiceschanged = () => {
+            pickVoice();
+            window.speechSynthesis.onvoiceschanged = null;
+          };
         }
-      } catch (ttsError) {
-        console.error("TTS ERROR:", ttsError);
       }
     } catch (error) {
       console.error("CHAT ERROR:", error);
@@ -96,9 +111,13 @@ export default function Chat() {
     setIsListening(true);
     recognition.start();
     recognition.onresult = (event: any) => {
-      setQuestion(event.results[0][0].transcript);
+      const transcript = event.results[0][0].transcript;
+      setQuestion(transcript);
       setIsListening(false);
-      inputRef.current?.focus();
+      // Auto-send after short delay so state settles
+      setTimeout(() => {
+        handleSend(transcript);
+      }, 500);
     };
     recognition.onerror = (event: any) => {
       console.log("Speech Error:", event.error);
@@ -580,6 +599,12 @@ export default function Chat() {
                 <div className="tb-sub">AI Engineer · Voice Interview Agent</div>
               </div>
             </div>
+            <button
+              onClick={() => { window.speechSynthesis.cancel(); setVoiceEnabled((v) => !v); }}
+              style={{ display:"flex", alignItems:"center", gap:"6px", padding:"5px 12px", background: voiceEnabled ? "rgba(99,102,241,.12)" : "rgba(239,68,68,.12)", border: voiceEnabled ? "1px solid rgba(99,102,241,.3)" : "1px solid rgba(239,68,68,.3)", borderRadius:"999px", color: voiceEnabled ? "#a5b4fc" : "#fca5a5", fontSize:"11px", fontWeight:600, cursor:"pointer", letterSpacing:".04em", whiteSpace:"nowrap", flexShrink:0 }}
+            >
+              {voiceEnabled ? "🔊 Voice On" : "🔇 Muted"}
+            </button>
             <div className="tb-pill">
               <div className="tb-dot" />
               <span className="tb-online">Online</span>
@@ -681,7 +706,7 @@ export default function Chat() {
                 )}
               </button>
             </div>
-            <p className="ifooter">Powered by Groq · Voice-enabled · AI-generated responses</p>
+            <p className="ifooter">Powered by Groq · Browser Speech Synthesis · No external TTS</p>
           </div>
 
         </div>
