@@ -119,7 +119,3 @@ npm run lint
 ## Environment Variables
 
 See `.env.local` for all required environment variables.
-
-## License
-
-MIT
